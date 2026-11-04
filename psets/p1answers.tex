@@ -1,0 +1,56 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\begin{document}
+\begin{itemize}
+
+    \item[(a)] The wrong statement is statement 6. Each vEB tree can contain many empty subtrees, each with its own min pointer. So counting all the min pointers and concluding that there are $n$ pointers is unjustified. For example, a sparse structure can contain $u$ empty structures. The hash-table implementation avoids allocating all the empty clusters, but it does not avoid the summary structures.
+    \item[(c)] Building on our answer from (a), by using hash tables for the clusters, we can reduce the space to $\mathcal{O}(n \log\log u)$.
+    \item Let $L = \lceil \log\log u \rceil$, the recursion depth of a vEB tree.
+    \item We assume that the vEB tree is initially empty and insert $n$ keys one at a time.
+    \item Along any recursive path, the universe size is square-rooted at each level, so there are $\mathcal{O}(\log\log u)$ levels.
+    \item At each level, an insertion creates only $\mathcal{O}(1)$ new space: at most a constant number of vEB records and hash-table entries for newly occupied clusters and their summaries.
+    \item Thus, each insertion adds $\mathcal{O}(\log\log u)$ space. After $n$ insertions,
+    \[
+        S(n,u) = \mathcal{O}(n \log\log u).
+    \]
+    \item Reference: MIT 6.046J Lecture 4 notes.
+    \item[(d)] Let $u = 2^m$ and choose $n = 2^k$, where $m \geq 2k$. Store the keys in the set
+    \[
+        S = \left\{j \cdot \frac{u}{n} : j = 0,1,\ldots,n-1\right\}.
+    \]
+    \item For example, let $u = 2^{n^2}$. Then $u/n$ is an integer when $n = 2^k$.
+    \item At a vEB level with universe size $v$, each cluster has size $\sqrt{v}$, so there are $\sqrt{v}$ clusters. The evenly spaced keys remain in distinct clusters as long as the spacing $u/n$ is at least the cluster size. After $i$ recursive levels, the universe size is $u^{1/2^i}$, so the cluster size at that level is $u^{1/2^{i+1}}$. Thus, the keys remain in distinct clusters while
+    \[
+        \frac{u}{n} \geq u^{1/2^{i+1}}.
+    \]
+    With $u = 2^{n^2}$, this holds for $\Theta(\log\log u)$ levels.
+    \item At each such level, the $n$ keys occupy distinct clusters. At most one is stored as the vEB node's minimum. Therefore, each of these levels uses $\Omega(n)$ space. Across $\Theta(\log\log u)$ levels, the total is $\Omega(n \log\log u)$.
+    \item Reference: MIT 6.851, ``Van Emde Boas in Space'' problem solutions.
+    \item[(e)] I would use indirection by partitioning the tree into local buckets of size $\Theta(\log\log u)$ using a balanced BST, and indexing only each bucket's representative element in the hash-table-based vEB tree.
+ 
+    \item[2] Let $q = sqrt(w)$, so $w = q^2$. Let $t = w - q = q(q-1)$
+    \item Let $m = \sum_{j = 0}^{q = 1} 2^j{q-1} = 1 + 2^{q-1} + 2^{2(q-1)} + \ldots + 2^{(q-1)^2}$.
+    \item For $x1,\ldots,x_q \in {0,1}$, the space input is
+    \[
+        X = sum_{j = 1}^{q}x_j2^jq-1
+    \]
+    \item in the product $X*m$, multiplying the $j$-th input bit by the $i$-th 1-bit of $m$ contributes:
+    \item $x_j * 2^{j*q - 1 + i*(q-1)}$
+    \item when $i = q - j$, this contribution lands at position $j * q - 1 + (q - j)*(q - 1) = t + j - 1$
+    \item So the aligned terms occupy positions $t, t+1, \ldots, t + q - 1$, encoding $x_1,\ldots,x_q$ in order.
+    \item No other product terms land in that range: for a general pair $(j,i)$, the exponent relative to $t$ is $j*q - 1 + i(q-1) - t = (j + i - q)*q + (q - i - 1)$
+    \item This is $ {0, \ldots, q-1}$ only when $j + i = q$. Also, distinct pairs $(j,i)$ give distinct exponents: if two exponent were equal then $q*\Delta*j = -(q-1)*\Delta*i$. Since $q$ and $q-1$ are coprime, a nonzero solution would require $|\Delta*i| >= q$, but $i \in {0, \ldots, q-1}$. Thus no product terms collide, and there are no carries to disrupt the selected bits.
+    \item Therefore, 
+    \[
+        \left\lfloor\frac{Xm}{2^t}\right\rfloor\bmod 2^q=\sum_{j=1}^{q}x_j2^{j-1},
+    \]
+    \item, which is the desired compression.
+    \item Therefore, $m > 0$, its highest set bit is at position $(q-1)^2$, so $m < 2^{(q-1)^2 + 1} \le 2^w$; and $ 0\le t = w - q \le w$
+    \item [3] I would use De Bruijn's Algorithm for finding the least significant bit. Let $w$ be our word. I would perform the bitwise $AND$ operation using $-w$. This zero's all other bits besides the least significant bit. After masking, I would multiply using the constant $0x077CB531U$ with the purpose of shifting the sequence left by $p$ positions, where $p$ is the LST bit's position.
+    \item The last 2 operations are shifting the word by $w >> 27$, focusing on our unique 5-bit window associated with index $p$. Since every 5-bit sequence in De Bruijn's number is unique, the 5-bit value we ended up with yields a unique number between $0$ and $31$. This number is used as an index for $BitPositionLookup$, where $BitPositionLookup$ is a hash map containing all numbers between $0$ and $31$, which maps back to the actual bit index $p$.
+\end{itemize}
+\end{document}
